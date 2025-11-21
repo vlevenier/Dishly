@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Plus, Search, Edit2, Trash2, Eye, EyeOff } from "lucide-react";
-import { useModal } from "../../context/ModalContext";
+import { useModal } from "../context/ModalContext";
 import {
   getProducts,
   createProduct,
   updateProduct,
   deleteProduct,
-} from "../../services/ProductsApi";
-import FormEditProduct from "./FormEditProduct";
+} from "../services/Products";
+import FormEditProduct from "./forms/FormProductsEdit";
 import toast from "react-hot-toast";
 
 export default function ProductsAdmin() {

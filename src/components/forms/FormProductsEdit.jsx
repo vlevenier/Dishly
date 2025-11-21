@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useModal } from "../../context/ModalContext";
+import { getCategories } from "../../services/Categories";
 
 export default function FormProductEdit({ product, onSave }) {
   const { closeModal } = useModal();
-
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     category_id: product?.category_id || "",
     name: product?.name || "",
@@ -14,6 +15,20 @@ export default function FormProductEdit({ product, onSave }) {
     is_combo: product?.is_combo ?? false,
     active: product?.active ?? true,
   });
+
+  const loadCategories = async () => {
+    const categoriesList = await getCategories();
+    console.log(categoriesList);
+    setCategories(categoriesList);
+  };
+
+  useEffect(() => {
+    
+    loadCategories();
+    }, []);
+    
+  
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -26,18 +41,32 @@ export default function FormProductEdit({ product, onSave }) {
       <h2 className="text-xl font-bold mb-4">
         {product ? "Editar Producto" : "Nuevo Producto"}
       </h2>
-
+   {JSON.stringify(categories)}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
           <Form.Label>Categoría *</Form.Label>
-          <Form.Control
+          {/* <Form.Control
             type="number"
             required
             value={formData.category_id}
             onChange={(e) =>
               setFormData({ ...formData, category_id: e.target.value })
             }
-          />
+          /> */}
+            <Form.Select
+            required
+            value={formData.category_id}
+            onChange={(e) =>
+              setFormData({ ...formData, category_id: e.target.value })
+            }
+            >
+                <option value="">Seleccione una categoría</option>
+  {categories.map((cat) => (
+    <option key={cat.id} value={cat.id}>
+      {cat.name}
+    </option>
+    ))}
+            </Form.Select>
         </Form.Group>
 
         <Form.Group className="mb-3">
@@ -80,7 +109,7 @@ export default function FormProductEdit({ product, onSave }) {
         <Form.Group className="mb-3">
           <Form.Label>URL Imagen</Form.Label>
           <Form.Control
-            type="url"
+            type="text"
             value={formData.image_url}
             onChange={(e) =>
               setFormData({ ...formData, image_url: e.target.value })
