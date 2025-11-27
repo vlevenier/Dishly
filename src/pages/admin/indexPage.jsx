@@ -5,12 +5,22 @@ import CategoriesAdmin from '../../components/ADMCategories';
 import ProductsAdmin from '../../components/ADMProducts';
 import ADMOrders from '../../components/ADMOrders';
 import ADMInvoices from '../../components/ADMInvoices';
+import GoogleSignInButton from '../../components/GoogleSignInButton';
+import LogoutButton from '../../components/Logout';
+import { useAuth } from '../../auth/useAuth';
 
 const IndexPage = () => {
+
+   const {user} = useAuth();
   return (
      
      <Layout>
-        <ADMOrders/>
+        {/* <ADMOrders/> */}
+        {JSON.stringify(user)}
+        <GoogleSignInButton/>
+
+        <LogoutButton></LogoutButton>
+        <ADMInvoices/>
      </Layout>
   );
 };

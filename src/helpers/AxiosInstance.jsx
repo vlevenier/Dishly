@@ -1,53 +1,37 @@
+// api.js
 import axios from "axios";
 
-
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true, // 🔥 cookies httpOnly viajan SIEMPRE
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Interceptores para añadir el token
+// ----------- REQUEST INTERCEPTOR -----------
 axiosInstance.interceptors.request.use(
   (config) => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    // el AuthProvider manejará el accessToken, no localStorage
+    const accessToken = window.__accessToken;
 
-    if (user && user.Token) {
-      config.headers["Authorization"] = `Bearer ${user.Token}`;
+    if (accessToken) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
     return config;
   },
-  (error) => {
-   /// alert(JSON.stringify(error));
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-
-
-
+// ----------- RESPONSE INTERCEPTOR -----------
 axiosInstance.interceptors.response.use(
-  (response) => {
-    // Si la respuesta es exitosa, simplemente la retornamos
-    return response;
-  },
+  (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Si el status es 401 (Unauthorized)
-      // Limpiar sessionStorage y localStorage
-      localStorage.removeItem('user'); 
-      sessionStorage.removeItem('userData'); 
-      //const history = useHistory();
-      //history.push('/login'); 
-      //navigate('/');
-      // Aquí puedes redirigir al login si es necesario
-      //const history = useHistory();
-      //history.push('/login'); // O la ruta de login que tengas configurada
+    if (error.response?.status === 401) {
+      // NO borramos nada aquí
+      // El AuthProvider se encargará de reintentar refresh
     }
-
-    // Relanzar el error para que pueda ser manejado en otro lugar si es necesario
     return Promise.reject(error);
   }
 );
