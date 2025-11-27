@@ -5,6 +5,7 @@ import { getProducts } from "../services/Products";
 import FormInvoice from "./forms/FormInvoices";
 import { getInvoices } from "../services/Invoices";
 import InvoicesTable from "./datatables/InvoicesTable";
+import { getFileURL } from "../services/Files";
 
 
 export default function ADMInvoices() {
@@ -36,6 +37,15 @@ export default function ADMInvoices() {
       }, []);
 
 
+      const openFile = async (fileKey) => {
+  try {
+    const url = await getFileURL(fileKey);
+    window.open(url, "_blank", "noopener,noreferrer");
+  } catch (err) {
+    console.error("Error abriendo archivo:", err);
+    alert("No se pudo abrir el archivo.");
+  }
+};
 
       const openCreateModal = ( invoice = null) => {
          //loading(false);
@@ -45,10 +55,9 @@ export default function ADMInvoices() {
     <div>
       <h1>Administración de Facturas</h1>
         <button onClick={openCreateModal}>Crear Pedido</button>
-{JSON.stringify(invoices)   }
 
 
-        <InvoicesTable invoices={invoices} onViewFile={openPDF} onEdit={(invoice) => openCreateModal(invoice) } />
+        <InvoicesTable invoices={invoices} onViewFile={openFile} onEdit={(invoice) => openCreateModal(invoice) } />
     </div>
   );
 }

@@ -10,8 +10,7 @@ const IndexPage = () => {
   return (
      
      <Layout>
-      
-        <ADMInvoices/>
+        <ADMOrders/>
      </Layout>
   );
 };

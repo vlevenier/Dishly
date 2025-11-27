@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
   export const getInvoices = async () => {
     try {
-        alert("here");
+       
       const response = await axiosInstance.get(`/invoices`);
       
       return response.data || [];

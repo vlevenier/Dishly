@@ -13,3 +13,18 @@ import { MostrarError } from "../helpers/Utils";
       throw error;
     }
   };
+export const getOrdersFilter = async (params) => {
+  console.log("getOrdersFilter params:", params );
+  const response = await axiosInstance.get("/orders/filters", { params });
+  return response.data;
+};
+
+    export const createOrder = async (payload) => {
+  try {
+    const resp = await axiosInstance.post("/orders", payload);
+    return resp.data;
+  } catch (error) {
+    MostrarError(error);
+    throw error;
+  }
+};
