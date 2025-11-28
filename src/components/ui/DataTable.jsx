@@ -34,7 +34,7 @@ export default function DataTable({ columns, data, onRowClick, renderActions }) 
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-100">
             <tr>
-              {columns.map((col) => (
+              {columns?.map((col) => (
                 <th
                   key={col.accessor}
                   onClick={() => handleSort(col)}
@@ -53,7 +53,7 @@ export default function DataTable({ columns, data, onRowClick, renderActions }) 
           </thead>
 
           <tbody>
-            {sortedData.map((row) => (
+            {sortedData?.map((row) => (
               <tr
                 key={row.id}
                 className="border-t hover:bg-gray-50 transition cursor-pointer"
@@ -73,7 +73,7 @@ export default function DataTable({ columns, data, onRowClick, renderActions }) 
 
       {/* MOBILE CARDS */}
       <div className="md:hidden flex flex-col gap-4">
-        {sortedData.map((row) => (
+        {sortedData?.map((row) => (
           <div
             key={row.id}
             className="border rounded-xl p-4 shadow-sm bg-white"

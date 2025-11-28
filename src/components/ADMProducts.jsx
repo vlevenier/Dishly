@@ -9,6 +9,8 @@ import {
 } from "../services/Products";
 import FormEditProduct from "./forms/FormProductsEdit";
 import toast from "react-hot-toast";
+import ProductsTable from "./datatables/ProductsTable";
+import FormProductRecipe from "./forms/FormProductRecipe";
 
 export default function ProductsAdmin() {
   const { showModal, closeModal } = useModal();
@@ -104,6 +106,14 @@ export default function ProductsAdmin() {
     );
   };
 
+  const openProductVariantRecipes = (variant) => {
+    showModal(
+      <FormProductRecipe
+        variant={variant}
+        />
+    );
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -136,65 +146,72 @@ export default function ProductsAdmin() {
           No hay productos para mostrar
         </div>
       ) : (
-        <div className="space-y-3">
-          {filteredProducts.map((p) => (
-            <div
-              key={p.id}
-              className="p-4 border rounded-lg bg-white flex justify-between items-center"
-            >
-              <div>
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  {p.name}
-                  {p.is_combo && (
-                    <span className="text-sm px-2 py-1 bg-yellow-200 rounded">
-                      Combo
-                    </span>
-                  )}
-                </h2>
+        <ProductsTable   
+        products={filteredProducts}
+      onEdit={openEditModal}
+      onDelete={handleDelete}
+      onToggleActive={handleToggleActive}
+      onOpenVariantRecipes={openProductVariantRecipes}
+    />
+        // <div className="space-y-3">
+        //   {filteredProducts.map((p) => (
+        //     <div
+        //       key={p.id}
+        //       className="p-4 border rounded-lg bg-white flex justify-between items-center"
+        //     >
+        //       <div>
+        //         <h2 className="text-lg font-semibold flex items-center gap-2">
+        //           {p.name}
+        //           {p.is_combo && (
+        //             <span className="text-sm px-2 py-1 bg-yellow-200 rounded">
+        //               Combo
+        //             </span>
+        //           )}
+        //         </h2>
 
-                <p className="text-sm text-gray-600">
-                  Categoría: {p.category_name}
-                </p>
+        //         <p className="text-sm text-gray-600">
+        //           Categoría: {p.category_name}
+        //         </p>
 
-                <p className="text-sm text-gray-600">
-                  Precio base: ${p.base_price}
-                </p>
+        //         <p className="text-sm text-gray-600">
+        //           Precio base: ${p.base_price}
+        //         </p>
 
-                {!p.active && (
-                  <span className="text-xs bg-red-200 px-2 py-1 rounded mt-1 inline-block">
-                    Inactivo
-                  </span>
-                )}
-              </div>
+        //         {!p.active && (
+        //           <span className="text-xs bg-red-200 px-2 py-1 rounded mt-1 inline-block">
+        //             Inactivo
+        //           </span>
+        //         )}
+        //       </div>
 
-              <div className="flex gap-2">
-                {/* Editar */}
-                <button
-                  className="p-2 rounded-lg bg-gray-100"
-                  onClick={() => openEditModal(p)}
-                >
-                  <Edit2 size={18} />
-                </button>
+        //       <div className="flex gap-2">
+        //         {/* Editar */}
+        //         <button
+        //           className="p-2 rounded-lg bg-gray-100"
+        //           onClick={() => openEditModal(p)}
+        //         >
+        //           <Edit2 size={18} />
+        //         </button>
 
-                {/* Activar / desactivar */}
-                <button
-                  className="p-2 rounded-lg bg-gray-100"
-                  onClick={() => handleToggleActive(p)}
-                >
-                  {p.active ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+        //         {/* Activar / desactivar */}
+        //         <button
+        //           className="p-2 rounded-lg bg-gray-100"
+        //           onClick={() => handleToggleActive(p)}
+        //         >
+        //           {p.active ? <EyeOff size={18} /> : <Eye size={18} />}
+        //         </button>
 
-                {/* Eliminar */}
-                <button
-                  className="p-2 rounded-lg bg-gray-100"
-                  onClick={() => handleDelete(p)}
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        //         {/* Eliminar */}
+        //         <button
+        //           className="p-2 rounded-lg bg-gray-100"
+        //           onClick={() => handleDelete(p)}
+        //         >
+        //           <Trash2 size={18} />
+        //         </button>
+        //       </div>
+        //     </div>
+        //   ))}
+        // </div>
       )}
     </div>
   );
