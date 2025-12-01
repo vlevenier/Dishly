@@ -10,7 +10,6 @@ import {
 import FormEditProduct from "./forms/FormProductsEdit";
 import toast from "react-hot-toast";
 import ProductsTable from "./datatables/ProductsTable";
-import FormProductRecipe from "./forms/FormProductRecipe";
 
 export default function ProductsAdmin() {
   const { showModal, closeModal } = useModal();

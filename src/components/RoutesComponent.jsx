@@ -8,6 +8,7 @@ import ADMIngredients from "./ADMIngredients";
 import ProductsAdmin from "./ADMProducts";
 import CategoriesAdmin from "./ADMCategories";
 import ADMInvoices from "./ADMInvoices";
+import ClientKiosk from "../pages/kiosk/Index";
 
 function RoutesComponent() {
 
@@ -16,7 +17,7 @@ function RoutesComponent() {
       <>
       <ToastContainer autoClose={15000}  />
       <Routes>
-          <Route path="/*" element={<HomePage />} />
+          <Route path="/*" element={<ClientKiosk />} />
           <Route path="/admin" element={<IndexPage />} >
             <Route path="orders" element={<ADMOrders/>}></Route>
             <Route path="products" element={<ProductsAdmin/>}></Route>

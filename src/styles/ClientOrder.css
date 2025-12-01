@@ -1,0 +1,558 @@
+/* Reseteo y Tipografía */
+        body {
+            font-family: 'Inter', sans-serif; /* Usar una fuente moderna */
+            background-color: #f8f8fa; /* Fondo claro general */
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Contenedor Principal con CSS Grid (Layout de 3 columnas en Desktop) */
+        .pedido-modulo-contenedor {
+            display: grid;
+            grid-template-columns: 220px 1fr 300px;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 40px auto; 
+            background-color: #ffffff;
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+            padding: 20px;
+            min-height: 80vh; 
+        }
+
+        /* ==========================================================
+           2. Estilos de la Navegación/Categorías (Aside Izquierdo)
+           ========================================================== */
+        .pedido-navegacion {
+            padding: 10px 0;
+        }
+
+        .navegacion-titulo {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .lista-categorias {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .categoria-item {
+            background: none;
+            border: 1px solid #e0e0e0;
+            color: #555;
+            padding: 12px 15px;
+            text-align: left;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            font-weight: 500;
+        }
+
+        /* UX: Estado Hover y Activo */
+        .categoria-item:hover {
+            border-color: #ff5722; 
+        }
+
+        .categoria-item.activo {
+            background-color: #ff5722; 
+            color: #ffffff;
+            border-color: #ff5722;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(255, 87, 34, 0.3);
+        }
+
+        /* ==========================================================
+           3. Estilos de la Lista de Productos (Main Central)
+           ========================================================== */
+        .pedido-productos {
+            padding: 10px;
+        }
+
+        .productos-titulo {
+            color: #222;
+            font-size: 2em;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #ff5722;
+            padding-bottom: 5px;
+        }
+
+        .lista-productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px;
+        }
+
+        /* Tarjeta de Producto (Foco en el Impacto Visual) */
+        .producto-tarjeta {
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        /* UX: Efecto al pasar el mouse (Hover) */
+        .producto-tarjeta:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .producto-imagen-contenedor {
+            aspect-ratio: 16 / 9; 
+            overflow: hidden;
+        }
+
+        .producto-imagen {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            transition: transform 0.4s;
+        }
+
+        .producto-tarjeta:hover .producto-imagen {
+            transform: scale(1.05);
+        }
+
+        .producto-info {
+            padding: 15px;
+        }
+
+        .producto-nombre {
+            font-size: 1.4em;
+            margin: 0 0 5px;
+            color: #222;
+        }
+
+        .producto-descripcion {
+            font-size: 0.9em;
+            color: #777;
+            margin-bottom: 10px;
+            height: 3em; 
+            overflow: hidden;
+        }
+
+        .producto-precio-accion {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .producto-precio {
+            font-size: 1.6em;
+            font-weight: 800;
+            color: #ff5722; 
+        }
+
+        .btn-agregar-carrito {
+            background-color: #ff5722;
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 25px; 
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* UX: Micro-interacción al presionar */
+        .btn-agregar-carrito:active {
+            background-color: #e64a19;
+            transform: scale(0.98);
+        }
+        
+        /* CSS Adicional para la micro-interacción de JS */
+        .btn-agregar-carrito.agregado {
+            background-color: #4CAF50; /* Cambia a verde al agregar */
+            transform: scale(1.05); 
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* ==========================================================
+           4. Estilos del Carrito de Compras (Aside Derecho)
+           ========================================================== */
+
+        .pedido-carrito {
+            background-color: #fefefe;
+            border-radius: 12px;
+            padding: 20px;
+            /* UX: Hacer que el carrito se mantenga visible */
+            position: sticky; 
+            top: 20px; 
+            height: fit-content;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .carrito-titulo {
+            font-size: 1.5em;
+            color: #222;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .carrito-items-lista {
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto; 
+        }
+
+        .carrito-item {
+            display: grid;
+            grid-template-columns: 30px 1fr 60px 20px; 
+            gap: 10px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #f0f0f0;
+            font-size: 0.9em;
+        }
+
+        .item-cantidad {
+            font-weight: 700;
+            color: #ff5722;
+        }
+
+        .item-nombre {
+            color: #444;
+        }
+
+        .item-subtotal {
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .btn-eliminar {
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            font-size: 0.8em;
+        }
+
+        .btn-eliminar:hover {
+            opacity: 1;
+        }
+
+        /* Resumen y Total */
+        .carrito-resumen {
+            padding-top: 15px;
+            border-top: 2px solid #ff5722;
+        }
+
+        .resumen-detalle {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 1em;
+            color: #555;
+        }
+
+        .resumen-total {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #222;
+            padding-top: 5px;
+        }
+
+        .monto-total {
+            color: #ff5722; 
+        }
+
+        /* Botón de Pago */
+        .btn-finalizar-pago {
+            width: 100%;
+            background-color: #4CAF50; 
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-finalizar-pago:hover:not([disabled]) {
+            background-color: #43a047;
+        }
+
+        /* UX: Estado Deshabilitado */
+        .btn-finalizar-pago[disabled] {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+
+        /* ==========================================================
+           5. Estilos Responsivos (Móviles y Tablets)
+           ========================================================== */
+
+        @media (max-width: 1100px) {
+            /* En tablets, cambiamos a 2 columnas principales */
+            .pedido-modulo-contenedor {
+                grid-template-columns: 1fr 300px; 
+                gap: 20px;
+                padding: 15px;
+            }
+
+            .pedido-navegacion {
+                grid-column: 1 / -1; 
+                display: none; 
+            }
+        }
+
+
+        @media (max-width: 768px) {
+            /* En Móviles: Una sola columna apilada */
+            .pedido-modulo-contenedor {
+                grid-template-columns: 1fr;
+                padding: 10px;
+                margin: 10px auto;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            
+            .pedido-carrito {
+                /* En móviles, el carrito se convierte en una barra fija en la parte inferior (UX esencial) */
+                position: fixed; 
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                border-radius: 12px 12px 0 0;
+                padding: 15px;
+                z-index: 1000;
+                box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+                /* El JS se encargaría de cambiar esto a 'translateY(0)' al abrir el carrito */
+                transform: translateY(100%); 
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .lista-productos-grid {
+                grid-template-columns: 1fr; 
+                gap: 20px;
+                padding-bottom: 120px; 
+            }
+        }
+
+
+
+
+
+
+
+
+
+        /* ==========================================================
+   6. Estilos del Modal de Procesamiento
+   ========================================================== */
+
+.processing-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente y oscuro */
+    z-index: 2000; /* Asegura que esté por encima de todo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px); /* Efecto moderno de desenfoque */
+}
+
+.processing-modal {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    transform: scale(0.95); /* Animación de entrada sutil */
+    animation: fadeInScale 0.3s ease-out forwards;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal-titulo {
+    color: #ff5722;
+    font-size: 1.8em;
+    margin-bottom: 5px;
+}
+
+.modal-subtitulo {
+    color: #777;
+    margin-bottom: 30px;
+    font-size: 1em;
+}
+
+.procesos-lista {
+    text-align: left;
+    margin-bottom: 25px;
+}
+
+.proceso-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    font-size: 1.1em;
+    border-bottom: 1px solid #eee;
+    color: #aaa;
+    transition: color 0.4s;
+}
+
+.proceso-item:last-child {
+    border-bottom: none;
+}
+
+.proceso-icono {
+    font-size: 1.2em;
+    margin-right: 15px;
+    width: 25px;
+    text-align: center;
+}
+
+.proceso-texto {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+/* UX: Estado Activo (el proceso actual) */
+.proceso-item.activo {
+    color: #333;
+    font-weight: 600;
+}
+
+/* UX: Estado Completado */
+.proceso-item.completado .proceso-icono {
+    color: #4CAF50; /* Verde de éxito */
+    content: '✅';
+}
+.proceso-item.completado .proceso-texto {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+.modal-nota {
+    font-size: 0.85em;
+    color: #ff5722;
+    background-color: #fff3e0;
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #ff5722;
+}
+
+
+
+
+
+
+
+
+/* ==========================================================
+   Estilos para los nuevos Controles de Cantidad en el Carrito
+   ========================================================== */
+
+/* Ajuste general del ítem para usar flexbox */
+.carrito-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95em;
+}
+
+/* Espacio para la información del producto */
+.item-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.item-nombre {
+    font-weight: 600;
+    color: #333;
+}
+
+.item-subtotal {
+    font-weight: 400;
+    color: #ff5722; /* Color principal de la app */
+    font-size: 0.9em;
+}
+
+/* Contenedor de botones para +/- y ❌ */
+.item-controles {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Espacio entre los controles */
+}
+
+.btn-ajustar-cantidad {
+    background: #f0f0f0;
+    border: none;
+    color: #333;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2em;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.btn-ajustar-cantidad:hover {
+    background: #ddd;
+}
+
+.btn-ajustar-cantidad:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.item-cantidad-badge {
+    padding: 0 5px;
+    font-weight: bold;
+    min-width: 15px;
+    text-align: center;
+    color: #333;
+}
+
+.btn-eliminar-completo {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    margin-left: 10px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    padding: 5px; /* Área de click más grande */
+}
+
+.btn-eliminar-completo:hover {
+    opacity: 1;
+}
