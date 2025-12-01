@@ -98,9 +98,9 @@ const finalizarPedido = () => {
             console.log("Orden creada con éxito:", response);
             const orderId = response.data.order_id; // Necesitas el ID para el seguimiento
             setActiveOrderId(orderId); // Establece la orden activa para el listener de pagos
-            if (!paymentData || !orderId) {
+          /*  if (!paymentData || !orderId) {
                  throw new Error("Respuesta incompleta: Faltan datos de pago/orden.");
-            }
+            }*/
             
             // --- ÉXITO EN LA CREACIÓN ---
             

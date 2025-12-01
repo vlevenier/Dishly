@@ -4,7 +4,7 @@ import io from 'socket.io-client';
 // Define la URL de tu backend de Node.js donde Socket.IO está corriendo
 // ¡Asegúrate de que este puerto sea el mismo que el de tu server.ts (ej. 3000)!
 //const SOCKET_SERVER_URL = "http://localhost:3000"; 
-const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL + ":3000"; // Ajusta el puerto si es necesario
+const SOCKET_SERVER_URL = import.meta.env.VITE_BASE_URL; //+ ":3000"; // Ajusta el puerto si es necesario
 
 /*
  * NOTA: La definición de "interface" fue eliminada para evitar el error de TypeScript (TS8006) 
