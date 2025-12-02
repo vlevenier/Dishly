@@ -19,7 +19,7 @@ export const getOrdersFilter = async (params) => {
   return response.data;
 };
 
-    export const createOrder = async (payload) => {
+export const createOrder = async (payload) => {
   try {
     const resp = await axiosInstance.post("/orders", payload);
     return resp.data;
@@ -28,3 +28,17 @@ export const getOrdersFilter = async (params) => {
     throw error;
   }
 };
+
+
+export const updateOrderPayment = async (payload) => {
+  try {
+    const resp = await axiosInstance.put(`/orders/${payload?.id}/pay`, {
+      payment_status: payload.payment_status,
+      payment_method: payload.paymentMethod,
+    });
+    return resp.data;
+  } catch (error) {
+    MostrarError(error);
+    throw error;
+  }
+};  

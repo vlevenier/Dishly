@@ -48,7 +48,7 @@ export default function ADMIngredients() {
       <button onClick={() => openIngredientModal()}>
         Crear Ingrediente
       </button>
-{JSON.stringify(ingredients)  }
+
        <IngredientsTable
         ingredients={ingredients}
         onEdit={(ingredient) => openIngredientModal(ingredient)}

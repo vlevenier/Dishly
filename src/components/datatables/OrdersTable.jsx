@@ -1,7 +1,7 @@
 import React from "react";
 import DataTable from "../ui/DataTable";
 
-export default function OrdersTable({ orders,onEdit }) {
+export default function OrdersTable({ orders,onEdit,onChangePayment }) {
 const columns = [
   {
     header: "N° Pedido",
@@ -14,8 +14,7 @@ const columns = [
       if (!items || items.length === 0) return "—";
 
       const firstItems = items.slice(0, 2)
-        .map(i => `${i.name} x${i.quantity}`)
-        .join(", ");
+.map(i => `${i.product_name} x${i.quantity}`)        .join(", ");
 
       const extra = row.items_count - items.length;
 
@@ -71,6 +70,18 @@ const columns = [
         >
           Editar
         </button> 
+
+
+
+        <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onChangePayment(row);
+      }}
+      className="ml-2 px-3 py-1 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700"
+    >
+      Cambiar Pago
+    </button>
         </>
       )}
     />

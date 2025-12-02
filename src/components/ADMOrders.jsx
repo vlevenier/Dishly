@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { createOrder, getOrdersFilter } from "../services/Orders";
+import { createOrder, getOrdersFilter, updateOrderPayment } from "../services/Orders";
 import { useModal } from "../context/ModalContext";
 import FormOrder from "./forms/FormOrders";
 import { getProducts } from "../services/Products";
 import OrdersTable from "./datatables/OrdersTable";
 import debounce from "lodash.debounce";
+import FormPaymentUpdate from "./forms/FormPaymentUpdate";
 
 export default function ADMOrders() {
   const [orders, setOrders] = useState([]);
@@ -87,6 +88,20 @@ export default function ADMOrders() {
     }
   };
 
+  const updatePayment = async (payload) => {
+
+    console.log("Updating payment with data:", payload );  
+    //return;
+    const resp = await updateOrderPayment(
+     payload
+    );
+    console.log("Payment update response:", resp );  
+    // 🔄 Actualizar tabla sin recargar todo
+    updateFilters({ page: 1 });
+    closeModal();
+  };
+
+
   // 📌 Abrir modal crear/editar
   const openCreateModal = (order) => {
     showModal(
@@ -121,6 +136,11 @@ export default function ADMOrders() {
         orders={orders}
         loading={loading}
         onEdit={(order) => openCreateModal(order)}
+        onChangePayment={(order) => {
+          showModal(
+            <FormPaymentUpdate order={order} onSave={updatePayment}  />
+          );
+        }}
       />
     </div>
   );

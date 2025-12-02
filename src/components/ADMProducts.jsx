@@ -10,6 +10,8 @@ import {
 import FormEditProduct from "./forms/FormProductsEdit";
 import toast from "react-hot-toast";
 import ProductsTable from "./datatables/ProductsTable";
+import FormProductRecipe from "./forms/FormProductRecipe";
+import ADMIngredients from "./ADMIngredients";
 
 export default function ProductsAdmin() {
   const { showModal, closeModal } = useModal();
@@ -105,6 +107,14 @@ export default function ProductsAdmin() {
     );
   };
 
+
+    const openIngredientes = () => {
+   
+    showModal(
+      <ADMIngredients  />
+    );
+  };
+
   const openProductVariantRecipes = (variant) => {
     showModal(
       <FormProductRecipe
@@ -117,6 +127,15 @@ export default function ProductsAdmin() {
     <div>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Productos</h1>
+
+
+       <button
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          onClick={openIngredientes}
+        >
+          <Plus size={18}  /> Ingredientes
+        </button>
+
 
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"

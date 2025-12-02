@@ -2,21 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useModal } from "../../context/ModalContext";
-// import { saveVariantRecipe } from "../../services/ProductRecipes";
 import { getIngredients } from "../../services/Ingredients";
+import { createProductRecipe } from "../../services/ProductRecipe";
 
 export default function FormProductRecipe({ variant, onSave }) {
   const { closeModal } = useModal();
   const [loading, setLoading] = useState(false);
   const [ingredients, setIngredients] = useState([]);
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    watch,
-  } = useForm({
+  const { register, handleSubmit, control, reset, watch } = useForm({
     defaultValues: {
       recipes: [],
     },
@@ -29,51 +23,47 @@ export default function FormProductRecipe({ variant, onSave }) {
 
   const recipesWatch = watch("recipes");
 
-  // Cargar ingredientes para el select
+  // 🔹 CARGAR INGREDIENTES
   useEffect(() => {
     const fetchIngredients = async () => {
       const list = await getIngredients();
-      setIngredients(list);
+      setIngredients(list || []);
     };
     fetchIngredients();
   }, []);
 
-  // Cargar recetas existentes de la variante
-useEffect(() => {
-  if (variant?.recipes && ingredients.length > 0) {
+  // 🔹 CARGAR RECETAS EXISTENTES CUANDO YA ESTÉN LOS INGREDIENTES
+  useEffect(() => {
+    if (!variant?.recipes || ingredients.length === 0) return;
+
     const formatted = variant.recipes.map((r) => ({
-      ...r,
       ingredient_id: String(r.ingredient_id),
-      unit: r.unit || r.ingredient_base_unit || "",
-      quantity: r.display_quantity || r.quantity_base_per_unit,
+      quantity_original: r.quantity_original || 1,
+      ingredient_unit_id: r.ingredient_unit_id || null,
     }));
 
     reset({ recipes: formatted });
-  }
-}, [variant, ingredients, reset]); // 👈 añadimos ingredients como dependencia
+  }, [variant, ingredients, reset]);
 
+  // ------------------------------------------------------------
+  // 🔹 GUARDAR
+  // ------------------------------------------------------------
   const onSubmit = async (data) => {
     try {
       setLoading(true);
 
-      const formattedRecipes = data.recipes.map((r) => {
-        const ing = ingredients.find((i) => i.id == r.ingredient_id);
-
-        const selectedUnit = ing?.units.find(
-          (u) => u.unit_name === r.unit
-        ) || { ratio_to_base: 1 };
-
-        const quantity_base_per_unit =
-          Number(r.quantity) * Number(selectedUnit.ratio_to_base);
-
-        return {
-          ingredient_id: r.ingredient_id,
-          quantity_base_per_unit,
-        };
-      });
-
-      //await saveVariantRecipe(variant.id, formattedRecipes);
-
+      const formattedRecipes = data.recipes.map((r) => ({
+        ingredient_id: Number(r.ingredient_id),
+        quantity_original: Number(r.quantity_original),
+        ingredient_unit_id: r.ingredient_unit_id
+          ? Number(r.ingredient_unit_id)
+          : null,
+      }));
+      console.log("Recetas formateadas:", formattedRecipes);
+         const response = await createProductRecipe(variant.id, formattedRecipes);
+         console.log("Respuesta receta creada:", response);
+      // await saveVariantRecipe(variant.id, formattedRecipes);
+       console.log("Guardar receta:", variant.id, formattedRecipes);  
       onSave?.();
       closeModal();
     } catch (err) {
@@ -84,6 +74,9 @@ useEffect(() => {
     }
   };
 
+  // ------------------------------------------------------------
+  // 🔹 RENDER
+  // ------------------------------------------------------------
   return (
     <div>
       <h2 className="text-xl font-bold mb-3">
@@ -92,7 +85,9 @@ useEffect(() => {
 
       <Form onSubmit={handleSubmit(onSubmit)}>
         {fields.length === 0 && (
-          <p className="text-gray-500 text-sm mb-3">No hay ingredientes aún</p>
+          <p className="text-gray-500 text-sm mb-3">
+            No hay ingredientes aún
+          </p>
         )}
 
         {fields.map((field, index) => {
@@ -114,8 +109,7 @@ useEffect(() => {
                 >
                   <option value="">Seleccione...</option>
                   {ingredients.map((ing) => (
-                  <option key={ing.id} value={String(ing.id)}>
-
+                    <option key={ing.id} value={String(ing.id)}>
                       {ing.name}
                     </option>
                   ))}
@@ -129,38 +123,30 @@ useEffect(() => {
                   type="number"
                   min="0.01"
                   step="0.01"
-                  {...register(`recipes.${index}.quantity`, {
+                  {...register(`recipes.${index}.quantity_original`, {
                     required: true,
                   })}
                 />
               </div>
 
               {/* UNIDAD */}
-              <div className="w-32">
-                <Form.Label>Unidad *</Form.Label>
-             <Form.Select {...register(`recipes.${index}.unit`, { required: true })}>
-  {selectedIng && (
-    <>
-      {/* SIEMPRE incluimos la unidad base */}
-      <option value={selectedIng.base_unit}>
-        {selectedIng.base_unit}
-      </option>
+              <div className="w-40">
+                <Form.Label>Unidad</Form.Label>
+                <Form.Select
+                  {...register(`recipes.${index}.ingredient_unit_id`)}
+                >
+                  {/* <option value="">Base por defecto</option> */}
 
-      {/* Luego todas las unidades, evitando repetir la base */}
-      {selectedIng.units
-        ?.filter(u => u.unit_name !== selectedIng.base_unit)
-        .map(u => (
-          <option key={u.id} value={u.unit_name}>
-            {u.unit_name}
-          </option>
-        ))}
-    </>
-  )}
-</Form.Select>
-
+                  {selectedIng &&
+                    selectedIng.units?.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.unit_name} ({u.ratio_to_base} base)
+                      </option>
+                    ))}
+                </Form.Select>
               </div>
 
-              {/* Eliminar */}
+              {/* ELIMINAR */}
               <Button
                 variant="danger"
                 size="sm"
@@ -176,7 +162,13 @@ useEffect(() => {
           variant="success"
           className="mb-3"
           size="sm"
-          onClick={() => append({ ingredient_id: "", quantity: 1 })}
+          onClick={() =>
+            append({
+              ingredient_id: "",
+              quantity_original: 1,
+              ingredient_unit_id: "",
+            })
+          }
         >
           + Agregar ingrediente
         </Button>
