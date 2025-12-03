@@ -3,7 +3,7 @@ import { Button, Form } from "react-bootstrap";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useModal } from "../../context/ModalContext";
 import { getIngredients } from "../../services/Ingredients";
-import { createProductRecipe } from "../../services/ProductRecipe";
+import { createProductRecipe, deleteRecipeItem, updateProductRecipe } from "../../services/ProductRecipe";
 
 export default function FormProductRecipe({ variant, onSave }) {
   const { closeModal } = useModal();
@@ -74,6 +74,71 @@ export default function FormProductRecipe({ variant, onSave }) {
     }
   };
 
+
+const onSubmit2 = async (data) => {
+  try {
+    setLoading(true);
+
+    const current = data.recipes;           // lo que envía el form
+    const original = variant.recipes || []; // lo que estaba antes
+
+    const originalIds = original.map(r => r.id);
+    const currentIds = current.filter(r => r.id).map(r => r.id);
+
+    // ------------------------------------------------------------
+    // 1) DELETE → eliminar los que ya no están
+    // ------------------------------------------------------------
+    const toDelete = originalIds.filter(id => !currentIds.includes(id));
+    for (const id of toDelete) {
+      await deleteRecipeItem(variant.id, id);
+    }
+
+    // ------------------------------------------------------------
+    // 2) UPDATE → actualizar solo los existentes
+    // ------------------------------------------------------------
+    for (const r of current) {
+      if (r.id) {
+        const payload = {
+          ingredient_id: Number(r.ingredient_id),
+          quantity_original: Number(r.quantity_original),
+          ingredient_unit_id: r.ingredient_unit_id
+            ? Number(r.ingredient_unit_id)
+            : null,
+        };
+
+        await updateProductRecipe(variant.id, r.id, payload);
+      }
+    }
+
+    // ------------------------------------------------------------
+    // 3) CREATE → enviar TODOS los nuevos en UN SOLO ARRAY
+    // ------------------------------------------------------------
+    const nuevos = current
+      .filter(r => !r.id)
+      .map(r => ({
+        ingredient_id: Number(r.ingredient_id),
+        quantity_original: Number(r.quantity_original),
+        ingredient_unit_id: r.ingredient_unit_id
+          ? Number(r.ingredient_unit_id)
+          : null,
+      }));
+
+    if (nuevos.length > 0) {
+      // 👈 una llamada, sin loops
+      await createProductRecipe(variant.id, nuevos);
+    }
+
+    onSave?.();
+    closeModal();
+
+  } catch (err) {
+    console.error("Error guardando receta:", err);
+    alert("Error guardando ingredientes");
+  } finally {
+    setLoading(false);
+  }
+};
+
   // ------------------------------------------------------------
   // 🔹 RENDER
   // ------------------------------------------------------------
@@ -83,7 +148,7 @@ export default function FormProductRecipe({ variant, onSave }) {
         Receta: {variant?.name}
       </h2>
 
-      <Form onSubmit={handleSubmit(onSubmit)}>
+      <Form onSubmit={handleSubmit(onSubmit2)}>
         {fields.length === 0 && (
           <p className="text-gray-500 text-sm mb-3">
             No hay ingredientes aún

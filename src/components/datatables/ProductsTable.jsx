@@ -19,7 +19,7 @@ export default function ProductsTable({
 
   return (
     <div className="space-y-3">
-      {products.map((p) => (
+      {products.filter(e=> e.active == true).map((p) => (
         <div
           key={p.id}
           className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition"

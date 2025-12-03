@@ -12,3 +12,25 @@ import toast from 'react-hot-toast';
     throw error;
   }
 };
+
+
+export const updateProductRecipe = async (id, payload) => {
+  try {
+    const resp = await axiosInstance.put(`/product-recipe/${id}`, payload);
+    return resp.data;
+  } catch (error) {
+    MostrarError(error);
+    throw error;
+  } 
+};
+
+
+export const deleteRecipeItem = async (productId, recipeId) => {
+  try {
+    const resp = await axiosInstance.delete(`/product-recipe/${productId}/${recipeId}`);
+    return resp.data;
+  } catch (error) {
+    MostrarError(error);
+    throw error;
+  }   
+};

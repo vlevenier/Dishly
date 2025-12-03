@@ -44,3 +44,13 @@ export const deleteProduct = async (id) => {
     throw error;
   }
 };
+
+export const softDeleteProduct = async (id) => {
+  try {
+    const resp = await axiosInstance.put(`/products/${id}/disable`);
+    return resp.data;
+  } catch (error) {
+    MostrarError(error);
+    throw error;
+  }
+} ;

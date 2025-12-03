@@ -6,6 +6,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  softDeleteProduct,
 } from "../services/Products";
 import FormEditProduct from "./forms/FormProductsEdit";
 import toast from "react-hot-toast";
@@ -83,10 +84,11 @@ export default function ProductsAdmin() {
   // Activar / desactivar
   const handleToggleActive = async (product) => {
     try {
-      await updateProduct(product.id, {
+      /*await updateProduct(product.id, {
         ...product,
         active: !product.active,
-      });
+      });*/
+      await softDeleteProduct(product.id);
 
       await loadProducts();
       toast.success("Estado actualizado");
@@ -119,6 +121,9 @@ export default function ProductsAdmin() {
     showModal(
       <FormProductRecipe
         variant={variant}
+        onSave={async () => {
+          await loadProducts();
+        }}
         />
     );
   };

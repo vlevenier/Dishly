@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Plus, Search, Edit2, Trash2, Eye, EyeOff } from "lucide-react";
 import { useModal } from "../context/ModalContext";
 import FormEditCategory from "./forms/FormCategoriesEdit";
-import { createCategory, deleteCategory, getCategories, updateCategory } from "../services/Categories";
+import { createCategory, deleteCategory, disabledCategory, getCategories, updateCategory } from "../services/Categories";
 import toast from "react-hot-toast";
 
 export default function CategoriesAdmin() {
@@ -66,7 +66,7 @@ export default function CategoriesAdmin() {
   if (!confirm("¿Eliminar?")) return;
 
   try {
-    await deleteCategory(id);
+    await disabledCategory(id);
     await getAndSetCategories();
     toast.success("Eliminado");
   } catch (e) {
@@ -220,6 +220,8 @@ export default function CategoriesAdmin() {
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
+
+                
                 </div>
               </div>
             </div>

@@ -82,6 +82,18 @@ const columns = [
     >
       Cambiar Pago
     </button>
+
+
+    
+        <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onChangePayment(row);
+      }}
+      className="ml-2 px-3 py-1 bg-green-600 text-white text-xs rounded-lg hover:bg-blue-700"
+    >
+      Imprimir Boleta
+    </button>
         </>
       )}
     />

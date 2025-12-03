@@ -44,3 +44,16 @@ export const deleteCategory = async (id) => {
     throw error;
   }
 };
+
+
+export const disabledCategory = async (id) => {
+  try {
+    const resp = await axiosInstance.put(`/categories/${id}/disable`);
+    toast.success('Categoría deshabilitada con éxito');
+    return resp.data;
+  }
+  catch (error) {
+    MostrarError(error);
+    throw error;
+  }     
+};
