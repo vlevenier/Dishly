@@ -1,8 +1,8 @@
-import { createOrder } from "../../services/Orders";
 import "../../styles/ClientOrder.css";
 // import { createOrder } from "../../services/Orders"; // Descomentar al usar el servicio real
 import { useState } from "react";
 import PaymentListener from "../socket/PaymentListener";
+import { createOrder } from "../../services/Payment";
 
 export default function OrderClientView({ menu }) {
     const [cart, setCart] = useState([]);

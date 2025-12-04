@@ -1,7 +1,7 @@
 import React from "react";
 import DataTable from "../ui/DataTable";
 
-export default function IngredientsTable({ ingredients, onEdit }) {
+export default function IngredientsTable({ ingredients, onEdit, onDisable }) {
   const columns = [
     {
       header: "Nombre",
@@ -56,6 +56,16 @@ export default function IngredientsTable({ ingredients, onEdit }) {
           >
             Editar
           </button>
+
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onDisable(row.id);
+            }}
+            className="ml-2 px-3 py-1 bg-red-500 text-white text-xs rounded-lg hover:bg-red-600"
+          >
+            Eliminar
+          </button> 
         </>
       )}
     />

@@ -69,12 +69,12 @@ export default function ProductsTable({
               </button>
 
               {/* Eliminar */}
-              <button
+              {/* <button
                 className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200"
                 onClick={() => onDelete(p)}
               >
                 <Trash2 size={18} />
-              </button>
+              </button> */}
             </div>
           </div>
 

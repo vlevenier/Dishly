@@ -36,3 +36,14 @@ import toast from 'react-hot-toast';
   }
 };
 
+export const disableIngredient = async (id) => {
+  try {
+    const resp = await axiosInstance.delete("/ingredients/"+id);  
+    toast.success("Ingrediente eliminado correctamente");
+    return resp.data;
+  } catch (error) {
+    MostrarError(error);
+    throw error;
+  } 
+};
+

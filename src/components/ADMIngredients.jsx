@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useModal } from "../context/ModalContext";
 
-import { getIngredients } from "../services/Ingredients";
+import { disableIngredient, getIngredients } from "../services/Ingredients";
 import IngredientsTable from "./datatables/IngredientsTable";
 import FormIngredient from "./forms/FormIngredients"; // <-- este lo crearemos
 
@@ -40,7 +40,14 @@ export default function ADMIngredients() {
       />
     );
   };
+  
+  const handleDisableIngredient = async (ingredientId) => {
+   
+    const response = await disableIngredient(ingredientId);
 
+    await loadIngredients();
+  }
+  
   return (
     <div>
       <h1>Administración de Ingredientes</h1>
@@ -52,6 +59,7 @@ export default function ADMIngredients() {
        <IngredientsTable
         ingredients={ingredients}
         onEdit={(ingredient) => openIngredientModal(ingredient)}
+        onDisable={handleDisableIngredient}
       /> 
     </div>
   );
