@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../auth/useAuth';
 import OrderClientView from '../../components/client/OrdersFood';
 import { getMenu } from '../../services/Menu';
+import OrderClientViewMain from '../../components/client/OrdersFoodMain';
 
 const ClientKiosk = () => {
      const {user} = useAuth();
@@ -23,7 +24,7 @@ const ClientKiosk = () => {
   return (
     <>
     
-       <OrderClientView menu={menu}/>
+       <OrderClientViewMain menu={menu}/>
     
      </>
   );

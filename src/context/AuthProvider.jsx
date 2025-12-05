@@ -8,35 +8,30 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState(null);  // Nuevo estado para el role
 
-  // Guardamos el intervalo para cancelarlo en logout
   const refreshIntervalRef = useRef(null);
 
-  // -----------------------
-  // LOGIN con Google
-  // -----------------------
   const login = async (id_token) => {
     const data = await loginWithGoogle(id_token);
 
     setUser(data.user);
     setAccessToken(data.accessToken);
-    window.__accessToken = data.accessToken; // correcto
+    setRole(data.user.role); // Asumimos que el API devuelve el role del usuario
+
+    window.__accessToken = data.accessToken;
 
     return data;
   };
 
-  // -----------------------
-  // LOGOUT
-  // -----------------------
   const logout = async () => {
     try {
-    await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
+      await axiosInstance.post("/auth/logout", {}, { withCredentials: true });
 
     } catch (err) {
       console.warn("Logout error (ignored):", err);
     }
 
-    // Muy importante → detiene auto-refresh
     if (refreshIntervalRef.current) {
       clearInterval(refreshIntervalRef.current);
       refreshIntervalRef.current = null;
@@ -44,16 +39,13 @@ export function AuthProvider({ children }) {
 
     setUser(null);
     setAccessToken(null);
+    setRole(null); // Limpiamos el role
     window.__accessToken = null;
   };
 
-  // -----------------------
-  // REFRESH token
-  // -----------------------
   const refresh = useCallback(async () => {
     try {
       const data = await refreshToken();
-
       setAccessToken(data.accessToken);
       window.__accessToken = data.accessToken;
 
@@ -61,13 +53,11 @@ export function AuthProvider({ children }) {
     } catch {
       setUser(null);
       setAccessToken(null);
+      setRole(null); // Limpiamos el role
       return null;
     }
   }, []);
 
-  // -----------------------
-  // CARGA INICIAL
-  // -----------------------
   useEffect(() => {
     let mounted = true;
 
@@ -81,12 +71,14 @@ export function AuthProvider({ children }) {
         if (mounted) {
           setUser(profile.user);
           setAccessToken(newAccess);
+          setRole(profile.user.role); // Asumimos que el role viene en el perfil
           window.__accessToken = newAccess;
         }
       } catch {
         if (mounted) {
           setUser(null);
           setAccessToken(null);
+          setRole(null); // Limpiamos el role
         }
       } finally {
         if (mounted) setLoading(false);
@@ -97,9 +89,6 @@ export function AuthProvider({ children }) {
     return () => (mounted = false);
   }, [refresh]);
 
-  // -----------------------
-  // AUTO REFRESH cada 10 min
-  // -----------------------
   useEffect(() => {
     refreshIntervalRef.current = setInterval(() => {
       refresh();
@@ -111,16 +100,15 @@ export function AuthProvider({ children }) {
   }, [refresh]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        accessToken,
-        loading,
-        login,
-        logout,
-        refresh,
-      }}
-    >
+    <AuthContext.Provider value={{
+      user,
+      accessToken,
+      loading,
+      role,  // Proveemos el role a los componentes
+      login,
+      logout,
+      refresh,
+    }}>
       {children}
     </AuthContext.Provider>
   );
