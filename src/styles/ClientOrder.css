@@ -1,524 +1,242 @@
-/* Reseteo y Tipografía */
-        body {
-            font-family: 'Inter', sans-serif; /* Usar una fuente moderna */
-            background-color: #f8f8fa; /* Fondo claro general */
-            margin: 0;
-            padding: 20px;
-        }
-
-        /* Contenedor Principal con CSS Grid (Layout de 3 columnas en Desktop) */
-        .pedido-modulo-contenedor {
-            display: grid;
-            grid-template-columns: 220px 1fr 300px;
-            gap: 30px;
-            max-width: 1400px;
-            margin: 40px auto; 
-            background-color: #ffffff;
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
-            padding: 20px;
-            min-height: 80vh; 
-        }
-
-        /* ==========================================================
-           2. Estilos de la Navegación/Categorías (Aside Izquierdo)
-           ========================================================== */
-        .pedido-navegacion {
-            padding: 10px 0;
-        }
-
-        .navegacion-titulo {
-            color: #333;
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
-
-        .lista-categorias {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .categoria-item {
-            background: none;
-            border: 1px solid #e0e0e0;
-            color: #555;
-            padding: 12px 15px;
-            text-align: left;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-            font-weight: 500;
-        }
-
-        /* UX: Estado Hover y Activo */
-        .categoria-item:hover {
-            border-color: #ff5722; 
-        }
-
-        .categoria-item.activo {
-            background-color: #ff5722; 
-            color: #ffffff;
-            border-color: #ff5722;
-            font-weight: 600;
-            box-shadow: 0 4px 8px rgba(255, 87, 34, 0.3);
-        }
-
-        /* ==========================================================
-           3. Estilos de la Lista de Productos (Main Central)
-           ========================================================== */
-        .pedido-productos {
-            padding: 10px;
-        }
-
-        .productos-titulo {
-            color: #222;
-            font-size: 2em;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #ff5722;
-            padding-bottom: 5px;
-        }
-
-        .lista-productos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 25px;
-        }
-
-        /* Tarjeta de Producto (Foco en el Impacto Visual) */
-        .producto-tarjeta {
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        /* UX: Efecto al pasar el mouse (Hover) */
-        .producto-tarjeta:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .producto-imagen-contenedor {
-            aspect-ratio: 16 / 9; 
-            overflow: hidden;
-        }
-
-        .producto-imagen {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-            transition: transform 0.4s;
-        }
-
-        .producto-tarjeta:hover .producto-imagen {
-            transform: scale(1.05);
-        }
-
-        .producto-info {
-            padding: 15px;
-        }
-
-        .producto-nombre {
-            font-size: 1.4em;
-            margin: 0 0 5px;
-            color: #222;
-        }
-
-        .producto-descripcion {
-            font-size: 0.9em;
-            color: #777;
-            margin-bottom: 10px;
-            height: 3em; 
-            overflow: hidden;
-        }
-
-        .producto-precio-accion {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-        }
-
-        .producto-precio {
-            font-size: 1.6em;
-            font-weight: 800;
-            color: #ff5722; 
-        }
-
-        .btn-agregar-carrito {
-            background-color: #ff5722;
-            color: #ffffff;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 25px; 
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.2s, transform 0.1s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* UX: Micro-interacción al presionar */
-        .btn-agregar-carrito:active {
-            background-color: #e64a19;
-            transform: scale(0.98);
-        }
-        
-        /* CSS Adicional para la micro-interacción de JS */
-        .btn-agregar-carrito.agregado {
-            background-color: #4CAF50; /* Cambia a verde al agregar */
-            transform: scale(1.05); 
-            animation: pulse 0.3s ease-in-out;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        /* ==========================================================
-           4. Estilos del Carrito de Compras (Aside Derecho)
-           ========================================================== */
-
-        .pedido-carrito {
-            background-color: #fefefe;
-            border-radius: 12px;
-            padding: 20px;
-            /* UX: Hacer que el carrito se mantenga visible */
-            position: sticky; 
-            top: 20px; 
-            height: fit-content;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .carrito-titulo {
-            font-size: 1.5em;
-            color: #222;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .carrito-items-lista {
-            margin-bottom: 20px;
-            max-height: 400px;
-            overflow-y: auto; 
-        }
-
-        .carrito-item {
-            display: grid;
-            grid-template-columns: 30px 1fr 60px 20px; 
-            gap: 10px;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dashed #f0f0f0;
-            font-size: 0.9em;
-        }
-
-        .item-cantidad {
-            font-weight: 700;
-            color: #ff5722;
-        }
-
-        .item-nombre {
-            color: #444;
-        }
-
-        .item-subtotal {
-            font-weight: 600;
-            text-align: right;
-        }
-
-        .btn-eliminar {
-            background: none;
-            border: none;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-            font-size: 0.8em;
-        }
-
-        .btn-eliminar:hover {
-            opacity: 1;
-        }
-
-        /* Resumen y Total */
-        .carrito-resumen {
-            padding-top: 15px;
-            border-top: 2px solid #ff5722;
-        }
-
-        .resumen-detalle {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 1em;
-            color: #555;
-        }
-
-        .resumen-total {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #222;
-            padding-top: 5px;
-        }
-
-        .monto-total {
-            color: #ff5722; 
-        }
-
-        /* Botón de Pago */
-        .btn-finalizar-pago {
-            width: 100%;
-            background-color: #4CAF50; 
-            color: white;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-
-        .btn-finalizar-pago:hover:not([disabled]) {
-            background-color: #43a047;
-        }
-
-        /* UX: Estado Deshabilitado */
-        .btn-finalizar-pago[disabled] {
-            background-color: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-
-        /* ==========================================================
-           5. Estilos Responsivos (Móviles y Tablets)
-           ========================================================== */
-
-        @media (max-width: 1100px) {
-            /* En tablets, cambiamos a 2 columnas principales */
-            .pedido-modulo-contenedor {
-                grid-template-columns: 1fr 300px; 
-                gap: 20px;
-                padding: 15px;
-            }
-
-            .pedido-navegacion {
-                grid-column: 1 / -1; 
-                display: none; 
-            }
-        }
-
-
-        @media (max-width: 768px) {
-            /* En Móviles: Una sola columna apilada */
-            .pedido-modulo-contenedor {
-                grid-template-columns: 1fr;
-                padding: 10px;
-                margin: 10px auto;
-                border-radius: 0;
-                box-shadow: none;
-            }
-            
-            .pedido-carrito {
-                /* En móviles, el carrito se convierte en una barra fija en la parte inferior (UX esencial) */
-                position: fixed; 
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                border-radius: 12px 12px 0 0;
-                padding: 15px;
-                z-index: 1000;
-                box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
-                /* El JS se encargaría de cambiar esto a 'translateY(0)' al abrir el carrito */
-                transform: translateY(100%); 
-                transition: transform 0.3s ease-in-out;
-            }
-
-            .lista-productos-grid {
-                grid-template-columns: 1fr; 
-                gap: 20px;
-                padding-bottom: 120px; 
-            }
-        }
-
-
-
-
-
-
-
-
-
-        /* ==========================================================
-   6. Estilos del Modal de Procesamiento
+/* ==========================================================
+   1. Reseteo y Tipografía General
    ========================================================== */
-
-.processing-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Fondo semi-transparente y oscuro */
-    z-index: 2000; /* Asegura que esté por encima de todo */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(5px); /* Efecto moderno de desenfoque */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f8fa;
+    margin: 0;
+    padding: 10px;
 }
 
-.processing-modal {
+/* Contenedor Principal Grid */
+.pedido-modulo-contenedor {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    gap: 30px;
+    max-width: 1400px;
+    margin: 20px auto; 
     background-color: #ffffff;
-    padding: 30px 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 450px;
-    text-align: center;
-    transform: scale(0.95); /* Animación de entrada sutil */
-    animation: fadeInScale 0.3s ease-out forwards;
+    border-radius: 16px; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); 
+    padding: 20px;
+    min-height: 80vh; 
 }
 
-@keyframes fadeInScale {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+/* ==========================================================
+   2. Navegación (Izquierda)
+   ========================================================== */
+.pedido-navegacion {
+    padding: 10px 0;
 }
 
-.modal-titulo {
-    color: #ff5722;
-    font-size: 1.8em;
-    margin-bottom: 5px;
-}
-
-.modal-subtitulo {
-    color: #777;
-    margin-bottom: 30px;
-    font-size: 1em;
-}
-
-.procesos-lista {
-    text-align: left;
-    margin-bottom: 25px;
-}
-
-.proceso-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 0;
-    font-size: 1.1em;
-    border-bottom: 1px solid #eee;
-    color: #aaa;
-    transition: color 0.4s;
-}
-
-.proceso-item:last-child {
-    border-bottom: none;
-}
-
-.proceso-icono {
+.navegacion-titulo {
+    color: #333;
     font-size: 1.2em;
-    margin-right: 15px;
-    width: 25px;
-    text-align: center;
+    margin-bottom: 15px;
+    font-weight: 700;
 }
 
-.proceso-texto {
-    flex-grow: 1;
+.lista-categorias {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.categoria-item {
+    background: none;
+    border: 1px solid #e0e0e0;
+    color: #555;
+    padding: 12px 15px;
+    text-align: left;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
     font-weight: 500;
 }
 
-/* UX: Estado Activo (el proceso actual) */
-.proceso-item.activo {
-    color: #333;
+.categoria-item:hover {
+    border-color: #ff5722; 
+}
+
+.categoria-item.activo {
+    background-color: #ff5722; 
+    color: #ffffff;
+    border-color: #ff5722;
     font-weight: 600;
+    box-shadow: 0 4px 8px rgba(255, 87, 34, 0.3);
 }
-
-/* UX: Estado Completado */
-.proceso-item.completado .proceso-icono {
-    color: #4CAF50; /* Verde de éxito */
-    content: '✅';
-}
-.proceso-item.completado .proceso-texto {
-    color: #4CAF50;
-    font-weight: 600;
-}
-
-.modal-nota {
-    font-size: 0.85em;
-    color: #ff5722;
-    background-color: #fff3e0;
-    padding: 10px;
-    border-radius: 8px;
-    border-left: 4px solid #ff5722;
-}
-
-
-
-
-
-
-
 
 /* ==========================================================
-   Estilos para los nuevos Controles de Cantidad en el Carrito
+   3. Productos (Centro)
    ========================================================== */
+.pedido-productos {
+    padding: 10px;
+}
 
-/* Ajuste general del ítem para usar flexbox */
+.productos-titulo {
+    color: #222;
+    font-size: 2em;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #ff5722;
+    padding-bottom: 5px;
+}
+
+.lista-productos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 25px;
+}
+
+.producto-tarjeta {
+    background-color: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.producto-tarjeta:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.producto-imagen-contenedor {
+    aspect-ratio: 16 / 9; 
+    overflow: hidden;
+}
+
+.producto-imagen {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    transition: transform 0.4s;
+}
+
+.producto-tarjeta:hover .producto-imagen {
+    transform: scale(1.05);
+}
+
+.producto-info {
+    padding: 15px;
+}
+
+.producto-nombre {
+    font-size: 1.4em;
+    margin: 0 0 5px;
+    color: #222;
+}
+
+.producto-descripcion {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 10px;
+    height: 3em; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.producto-precio-accion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.producto-precio {
+    font-size: 1.6em;
+    font-weight: 800;
+    color: #ff5722; 
+}
+
+.btn-agregar-carrito {
+    background-color: #ff5722;
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 25px; 
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-agregar-carrito:active {
+    background-color: #e64a19;
+    transform: scale(0.98);
+}
+
+/* ==========================================================
+   4. Carrito (Derecha)
+   ========================================================== */
+.pedido-carrito {
+    background-color: #fefefe;
+    border-radius: 12px;
+    padding: 20px;
+    position: sticky; 
+    top: 20px; 
+    height: fit-content;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.carrito-titulo {
+    font-size: 1.5em;
+    color: #222;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.carrito-items-lista {
+    margin-bottom: 20px;
+    max-height: 400px;
+    overflow-y: auto; 
+}
+
+/* Ítems del Carrito */
 .carrito-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-    font-size: 0.95em;
+    padding: 12px 0;
+    border-bottom: 1px dashed #f0f0f0;
 }
 
-/* Espacio para la información del producto */
 .item-info {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    text-align: left;
 }
 
 .item-nombre {
     font-weight: 600;
     color: #333;
+    font-size: 0.95em;
 }
 
 .item-subtotal {
-    font-weight: 400;
-    color: #ff5722; /* Color principal de la app */
+    color: #ff5722;
     font-size: 0.9em;
+    font-weight: 500;
 }
 
-/* Contenedor de botones para +/- y ❌ */
+/* Controles (+ - eliminar) */
 .item-controles {
     display: flex;
     align-items: center;
-    gap: 5px; /* Espacio entre los controles */
+    gap: 8px;
 }
 
 .btn-ajustar-cantidad {
     background: #f0f0f0;
     border: none;
     color: #333;
-    width: 30px;
-    height: 30px;
-    border-radius: 5px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 1.2em;
-    line-height: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -526,33 +244,266 @@
 }
 
 .btn-ajustar-cantidad:hover {
-    background: #ddd;
-}
-
-.btn-ajustar-cantidad:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background: #e0e0e0;
 }
 
 .item-cantidad-badge {
-    padding: 0 5px;
-    font-weight: bold;
-    min-width: 15px;
+    min-width: 20px;
     text-align: center;
-    color: #333;
+    font-weight: 700;
+    font-size: 0.9em;
 }
 
 .btn-eliminar-completo {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 1.2em;
-    margin-left: 10px;
-    opacity: 0.7;
+    font-size: 1.1em;
+    opacity: 0.5;
     transition: opacity 0.2s;
-    padding: 5px; /* Área de click más grande */
+    margin-left: 5px;
 }
 
 .btn-eliminar-completo:hover {
     opacity: 1;
+}
+
+/* Resumen y Botón Final */
+.carrito-resumen {
+    padding-top: 15px;
+    border-top: 2px solid #ff5722;
+}
+
+.resumen-detalle {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.resumen-total {
+    font-size: 1.3em;
+    font-weight: 800;
+    color: #222;
+    margin-top: 10px;
+}
+
+.btn-finalizar-pago {
+    width: 100%;
+    background-color: #4CAF50; 
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+}
+
+.btn-finalizar-pago:hover:not([disabled]) {
+    background-color: #43a047;
+}
+
+.btn-finalizar-pago[disabled] {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* ==========================================================
+   5. MODAL DE PROCESAMIENTO (CRÍTICO)
+   ========================================================== */
+
+.processing-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+}
+
+.processing-modal {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    /* Transición suave para cambiar de tamaño */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Estilos de Texto del Modal */
+.modal-titulo {
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.modal-subtitulo {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+/* Lista de Pasos */
+.procesos-lista {
+    text-align: left;
+    margin-bottom: 20px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.proceso-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    color: #aaa;
+    font-size: 1.1em;
+}
+
+.proceso-item.activo { color: #333; font-weight: 600; }
+.proceso-item.completado { color: #4CAF50; }
+.proceso-icono { margin-right: 15px; width: 30px; text-align: center; }
+
+/* Errores */
+.error-box {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+.modal-acciones {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.btn-modal-cancelar, .btn-modal-reintentar {
+    padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;
+}
+.btn-modal-cancelar { background: #eee; color: #333; }
+.btn-modal-reintentar { background: #ff5722; color: #fff; }
+
+/* ==========================================================
+   6. PANTALLA DE ÉXITO (LO NUEVO)
+   ========================================================== */
+
+/* 1. Modificador del Modal (Borde verde) */
+.modal-success {
+    border: 4px solid #4CAF50;
+    transform: scale(1.02);
+}
+
+/* 2. Contenedor del contenido de éxito (FALTABA ESTO) */
+.success-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+/* 3. Animación de entrada (FALTABA ESTO) */
+.animate-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 4. Elementos visuales */
+.icon-success-wrapper {
+    font-size: 4rem;
+    margin-bottom: 10px;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.titulo-exito {
+    color: #2E7D32;
+    font-size: 2.2rem;
+    margin: 10px 0;
+    font-weight: 800;
+}
+
+.subtitulo-exito {
+    color: #555;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+/* 5. El Número Gigante */
+.numero-orden-gigante {
+    font-size: 4.5rem; /* Muy grande */
+    font-weight: 900;
+    color: #333;
+    background-color: #f4f4f4;
+    padding: 15px 50px;
+    margin: 20px 0;
+    border-radius: 15px;
+    border: 3px dashed #bbb;
+    letter-spacing: -2px;
+}
+
+.instruccion-final {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* 6. Barra de Tiempo */
+.barra-progreso-reset {
+    width: 100%;
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.barra-relleno {
+    height: 100%;
+    background-color: #4CAF50;
+    /* La transición se controla vía inline-style en React */
+    transition: width 1s linear; 
+}
+
+.texto-reset {
+    font-size: 0.9rem;
+    color: #999;
+    margin-top: 8px;
+}
+
+@keyframes popIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+/* ==========================================================
+   7. Media Queries (Responsivo)
+   ========================================================== */
+@media (max-width: 1100px) {
+    .pedido-modulo-contenedor { grid-template-columns: 1fr 300px; padding: 15px; }
+    .pedido-navegacion { display: none; }
+}
+
+@media (max-width: 768px) {
+    .pedido-modulo-contenedor { grid-template-columns: 1fr; margin: 10px; padding: 10px; }
+    .pedido-carrito {
+        position: fixed; bottom: 0; left: 0; width: 100%;
+        border-radius: 16px 16px 0 0; z-index: 1000;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+    }
+    .lista-productos-grid { padding-bottom: 100px; }
+    .processing-modal { width: 95%; padding: 20px; }
+    .numero-orden-gigante { font-size: 3rem; padding: 10px 30px; }
 }

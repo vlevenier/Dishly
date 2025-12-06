@@ -1,267 +1,285 @@
 import "../../styles/ClientOrder.css";
-// import { createOrder } from "../../services/Orders"; // Descomentar al usar el servicio real
-import { useState } from "react";
-import PaymentListener from "../socket/PaymentListener";
+import { useState, useEffect, useRef } from "react";
 import { createOrder } from "../../services/Payment";
+import PaymentListenerSC from "../socket/PaymentListenerSC";
+
 export default function OrderClientViewMain({ menu }) {
 
     // -------------------------
-    // Normalizar menú
+    // 1. CONFIGURACIÓN
+    // -------------------------
+    const PAYMENT_TIMEOUT_MS = 12000; // 2 minutos (Watchdog)
+    const SUCCESS_DISPLAY_TIME = 7;    // 5 segundos para ver el éxito
+    const STEP_DELAY = 1000;           // Transiciones suaves
+
+    // -------------------------
+    // 2. NORMALIZACIÓN DE DATOS
     // -------------------------
     const categories = menu?.categories || [];
     const combos = menu?.combos || [];
-
-    // Insertamos "Combos" como categoría virtual
     const fullMenu = [
         ...categories,
-        {
-            id: "combos-section",   // id único que no colisiona con categorías
-            name: "Combos",
-            products: combos
-        }
+        { id: "combos-section", name: "Combos", products: combos }
     ];
 
+    // -------------------------
+    // 3. ESTADOS
+    // -------------------------
     const [cart, setCart] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(
-        fullMenu?.[0]?.id || null
-    );
-
+    const [selectedCategory, setSelectedCategory] = useState(fullMenu?.[0]?.id || null);
+    
+    // Estados de la Máquina de Pago
     const [isLoading, setIsLoading] = useState(false);
-    const [processingStep, setProcessingStep] = useState(0);
+    // 0:Inactivo | 1:Creando | 2:Conectando | 3:Esperando Tarjeta | 4:ÉXITO | 99:Error
+    const [processingStep, setProcessingStep] = useState(0); 
     const [error, setError] = useState(null);
     const [activeOrderId, setActiveOrderId] = useState(null);
+    
+    // Estado visual para la cuenta regresiva
+    const [countdown, setCountdown] = useState(SUCCESS_DISPLAY_TIME);
 
-
-    // -------------------------
-    // Productos de la categoría actual
-    // -------------------------
-    const productos =
-        fullMenu.find((cat) => cat.id === selectedCategory)?.products || [];
-
+    // Refs para temporizadores
+    const watchdogTimerRef = useRef(null);
 
     // -------------------------
-    // Carrito
+    // 4. LÓGICA DEL CARRITO
     // -------------------------
+    const productos = fullMenu.find((cat) => cat.id === selectedCategory)?.products || [];
+
     const addToCart = (product) => {
         setCart((prev) => {
             const exists = prev.find((i) => i.product_id === product.id);
-
-            if (exists) {
-                return prev.map((i) =>
-                    i.product_id === product.id
-                        ? { ...i, quantity: i.quantity + 1 }
-                        : i
-                );
-            }
-
-            return [
-                ...prev,
-                {
-                    product_id: product.id,
-                    quantity: 1,
-                    price: product.base_price,
-                    productName: product.name,
-                },
-            ];
+            return exists 
+                ? prev.map((i) => i.product_id === product.id ? { ...i, quantity: i.quantity + 1 } : i)
+                : [...prev, { product_id: product.id, quantity: 1, price: product.base_price, productName: product.name }];
         });
     };
 
-    const removeItem = (productId) => {
-        setCart((prev) => prev.filter((i) => i.product_id !== productId));
+    const removeItem = (id) => setCart((prev) => prev.filter((i) => i.product_id !== id));
+    
+    const increaseQuantity = (id) => {
+        setCart((prev) => prev.map((item) => item.product_id === id ? { ...item, quantity: item.quantity + 1 } : item));
     };
 
-    const increaseQuantity = (productId) => {
-        setCart((prev) =>
-            prev.map((item) =>
-                item.product_id === productId
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item
-            )
-        );
+    const decreaseQuantity = (id) => {
+        setCart((prev) => prev.reduce((acc, item) => {
+            if (item.product_id === id) {
+                if (item.quantity > 1) acc.push({ ...item, quantity: item.quantity - 1 });
+            } else acc.push(item);
+            return acc;
+        }, []));
     };
 
-    const decreaseQuantity = (productId) => {
-        setCart((prev) =>
-            prev.reduce((acc, item) => {
-                if (item.product_id === productId) {
-                    const newQuantity = item.quantity - 1;
-                    if (newQuantity > 0) acc.push({ ...item, quantity: newQuantity });
-                } else acc.push(item);
-                return acc;
-            }, [])
-        );
-    };
-
-
-    // -------------------------
-    // Totales
-    // -------------------------
     const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
     const total = subtotal;
 
+    // -------------------------
+    // 5. EFECTOS (Lógica de Tiempo)
+    // -------------------------
+
+    // A) Watchdog (Seguridad en Paso 3)
+    useEffect(() => {
+        if (processingStep === 3) {
+            watchdogTimerRef.current = setTimeout(() => {
+                handleFailure(activeOrderId, "Se agotó el tiempo de espera en la terminal.");
+            }, PAYMENT_TIMEOUT_MS);
+        }
+        return () => clearTimeout(watchdogTimerRef.current);
+    }, [processingStep, activeOrderId]);
+
+    // B) Contador de Éxito (Paso 4 -> Reset) [OPTIMIZADO]
+    useEffect(() => {
+        let interval = null;
+
+        if (processingStep === 4) {
+            // Reiniciamos el contador visualmente al entrar
+            setCountdown(SUCCESS_DISPLAY_TIME);
+            
+            interval = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        // Cuando llega a 1, el siguiente tick es el fin
+                        clearInterval(interval);
+                        resetSystem(); // <--- Aquí se limpia todo y se cierra el modal
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [processingStep]);
 
     // -------------------------
-    // Flujo de pago
+    // 6. FUNCIONES DEL SISTEMA
     // -------------------------
-    const advanceStep = (stepNumber) => setProcessingStep(stepNumber);
-
-    const finalizarPedido = () => {
-        (async () => {
-            if (isLoading || cart.length === 0) return;
-
-            setIsLoading(true);
-            setError(null);
-            setProcessingStep(1);
-
-            const stepDelay = 1000;
-
-            try {
-                const payload = {
-                    status: "pending",
-                    payment_status: "pending",
-                    payment_method: "kiosko_mp",
-                    source: "kiosk",
-                    items: cart.map((c) => ({
-                        product_id: c.product_id,
-                        quantity: c.quantity,
-                    })),
-                };
-
-                const response = await createOrder(payload);
-                const orderId = response.data.order_id;
-
-                setActiveOrderId(orderId);
-
-                await new Promise((res) => setTimeout(res, stepDelay));
-                advanceStep(2);
-                await new Promise((res) => setTimeout(res, stepDelay));
-                advanceStep(3);
-
-                setCart([]);
-                setIsLoading(false);
-                setProcessingStep(0);
-
-            } catch (error) {
-                console.error("Error al finalizar el pedido:", error);
-
-                setError(error.message || "Error desconocido.");
-                setIsLoading(false);
-                setProcessingStep(99);
-            }
-        })();
+    
+    const resetSystem = () => {
+        console.log("🔄 Sistema reiniciado para nuevo cliente");
+        setCart([]);           
+        setActiveOrderId(null); 
+        setProcessingStep(0);   
+        setIsLoading(false);    
+        setError(null);
     };
 
+    const finalizarPedido = async () => {
+        if (isLoading || cart.length === 0) return;
+
+        setIsLoading(true);
+        setError(null);
+        setProcessingStep(1); 
+
+        try {
+            const payload = {
+                status: "pending",
+                payment_status: "pending",
+                payment_method: "kiosko_mp",
+                source: "kiosk",
+                items: cart.map((c) => ({
+                    product_id: c.product_id,
+                    quantity: c.quantity,
+                })),
+            };
+
+            const response = await createOrder(payload);
+
+            if (!response || !response.order_id) throw new Error("Error en servidor");
+
+            const orderId = response.order_id;
+            setActiveOrderId(orderId); 
+
+            // UX Transiciones
+            await new Promise(r => setTimeout(r, STEP_DELAY));
+            setProcessingStep(2); 
+
+            await new Promise(r => setTimeout(r, STEP_DELAY));
+            setProcessingStep(3); // Activa Watchdog y Listener
+
+        } catch (error) {
+            console.error(error);
+            handleFailure(null, error.message || "Error de conexión.");
+        }
+    };
 
     // -------------------------
-    // RENDER
+    // 7. HANDLERS
     // -------------------------
+    const handleSuccess = (orderId) => {
+        console.log(`✅ Pago exitoso Orden #${orderId}`);
+        // No borramos carrito, vamos al paso 4 para mostrar el número gigante
+        setProcessingStep(4);
+    };
 
-      const renderProcessingModal = () => {
+    const handleFailure = (orderId, reason) => {
+        console.error(`❌ Fallo: ${reason}`);
+        setError(reason || "El pago no pudo ser procesado.");
+        setProcessingStep(99); 
+        setIsLoading(false);
+    };
+
+    const cerrarModalError = () => {
+        setProcessingStep(0);
+        setError(null);
+    };
+
+    // -------------------------
+    // 8. RENDERIZADO
+    // -------------------------
+    const renderProcessingModal = () => {
         if (processingStep === 0) return null;
-
-        const isErrorState = processingStep === 99;
+        
+        const isError = processingStep === 99;
+        const isSuccess = processingStep === 4;
 
         return (
             <div className="processing-modal-overlay">
-            <div className="processing-modal">
-                
-                {/* TÍTULO DINÁMICO */}
-                <h2 className="modal-titulo" style={{ color: isErrorState ? '#D32F2F' : '#ff5722' }}>
-                    {isErrorState ? '🔴 Error en el Proceso' : 'Procesando tu Pedido'}
-                </h2>
-                <p className="modal-subtitulo">
-                    {isErrorState 
-                        ? 'Ocurrió un problema inesperado. Por favor, revisa y vuelve a intentarlo.' 
-                        : 'Estamos asegurando tu orden antes de pasar al pago.'}
-                </p>
-
-                {/* VISUALIZACIÓN DE PROCESOS/ERROR */}
-                <div className="procesos-lista">
+                <div className={`processing-modal ${isError ? 'modal-error' : ''} ${isSuccess ? 'modal-success' : ''}`}>
                     
-                    {isErrorState ? (
-                        // MOSTRAR MENSAJE DE ERROR
-                        <div className="error-box">
-                            <p className="error-mensaje">{error || "Error de conexión desconocido."}</p>
-                            <p className="error-instruccion">
-                                Puedes revisar el carrito o intentar nuevamente.
-                            </p>
-                        </div>
-                    ) : (
-                        // MOSTRAR PASOS NORMALES (FLUJO KIOSCO)
-                        <>
-                            <div className={`proceso-item ${processingStep >= 1 ? 'activo' : ''} ${processingStep > 1 ? 'completado' : ''}`}>
-                                <span className="proceso-icono">{processingStep > 1 ? '✅' : '⏳'}</span>
-                                <span className="proceso-texto">1. Creando Orden en el Sistema...</span>
-                            </div>
-
-                            <div className={`proceso-item ${processingStep >= 2 ? 'activo' : ''} ${processingStep > 2 ? 'completado' : ''}`}>
-                                <span className="proceso-icono">{processingStep > 2 ? '✅' : '🔒'}</span>
-                                <span className="proceso-texto">2. Obteniendo Credenciales de Pago...</span>
+                    {/* --- ESCENA DE ÉXITO --- */}
+                    {isSuccess ? (
+                        <div className="success-content animate-fade-in">
+                            <div className="icon-success-wrapper">✅</div>
+                            <h2 className="titulo-exito">¡Pedido Confirmado!</h2>
+                            <p className="subtitulo-exito">Tu número de orden es:</p>
+                            
+                            <div className="numero-orden-gigante">
+                                #{activeOrderId || "..."}
                             </div>
                             
-                            <div className={`proceso-item ${processingStep >= 3 ? 'activo' : ''}`}>
-                                <span className="proceso-icono">💳</span> {/* Icono de pago/terminal */}
-                                <span className="proceso-texto">3. Mostrando Pantalla de Pago...</span>
+                            <p className="instruccion-final">Por favor, retira tu ticket.</p>
+
+                            <div className="barra-progreso-reset">
+                                <div 
+                                    className="barra-relleno" 
+                                    style={{ width: `${(countdown / SUCCESS_DISPLAY_TIME) * 100}%` }}
+                                ></div>
+                            </div>
+                            <p className="texto-reset">Reiniciando en {countdown}s...</p>
+                        </div>
+                    ) : (
+                        /* --- ESCENAS DE PROCESO Y ERROR --- */
+                        <>
+                            <h2 className="modal-titulo" style={{ color: isError ? '#D32F2F' : '#ff5722' }}>
+                                {isError ? '🔴 Error en el Pago' : 'Procesando tu Pedido'}
+                            </h2>
+                            
+                            <p className="modal-subtitulo">
+                                {isError ? 'Hubo un problema con la transacción.' : 'Sigue las instrucciones en pantalla.'}
+                            </p>
+
+                            <div className="procesos-lista">
+                                {isError ? (
+                                    <div className="error-box">
+                                        <p className="error-mensaje">{error}</p>
+                                        <div className="modal-acciones">
+                                            <button className="btn-modal-cancelar" onClick={cerrarModalError}>Volver</button>
+                                            <button className="btn-modal-reintentar" onClick={finalizarPedido}>Reintentar</button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className={`proceso-item ${processingStep >= 1 ? 'activo' : ''} ${processingStep > 1 ? 'completado' : ''}`}>
+                                            <span className="proceso-icono">{processingStep > 1 ? '✅' : '⚙️'}</span>
+                                            <span className="proceso-texto">1. Creando Orden...</span>
+                                        </div>
+                                        <div className={`proceso-item ${processingStep >= 2 ? 'activo' : ''} ${processingStep > 2 ? 'completado' : ''}`}>
+                                            <span className="proceso-icono">{processingStep > 2 ? '✅' : '🔗'}</span>
+                                            <span className="proceso-texto">2. Conectando Terminal...</span>
+                                        </div>
+                                        <div className={`proceso-item ${processingStep >= 3 ? 'activo' : ''}`}>
+                                            <span className="proceso-icono">💳</span>
+                                            <span className="proceso-texto" style={{fontWeight: 'bold'}}>3. Acerque su tarjeta al Point</span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </>
                     )}
                 </div>
-                
-                {/* BOTONES DE ACCIÓN (Solo se muestran en estado de error) */}
-                {isErrorState && (
-                    <div className="modal-acciones">
-                        <button 
-                            className="btn-modal-cancelar" 
-                            onClick={() => setProcessingStep(0)} // Cierra el modal de error
-                        >
-                            Revisar Carrito
-                        </button>
-                        <button 
-                            className="btn-modal-reintentar" 
-                            onClick={finalizarPedido} // Vuelve a intentar la función
-                        >
-                            Volver a Intentar
-                        </button>
-                    </div>
-                )}
-
-                <p className="modal-nota">
-                    {isErrorState ? "Si el problema persiste, contacta al personal." : "Por favor, no cierres ni recargues la ventana."}
-                </p>
             </div>
-        </div>
         );
     };
 
-    
-    const handleSuccess = (orderId) => {
-        console.log(`Pago exitoso para la orden ${orderId}.`);
-        // Aquí puedes agregar lógica adicional, como redirigir al usuario o mostrar un mensaje de éxito.
-    }
-    const handleFailure = (orderId, reason) => {
-        console.error(`Pago fallido para la orden ${orderId}. Razón: ${reason}`);
-        // Aquí puedes agregar lógica adicional, como mostrar un mensaje de error al usuario.
-    }
     return (
         <>
-            {/* Modal procesamiento */}
             {renderProcessingModal()}
 
-            <PaymentListener
+            <PaymentListenerSC 
                 activeOrderId={activeOrderId}
                 onPaymentSuccess={handleSuccess}
                 onPaymentFailure={handleFailure}
             />
 
             <section className="pedido-modulo-contenedor">
-
-                {/* CATEGORÍAS */}
                 <aside className="pedido-navegacion">
-                    <h2 className="navegacion-titulo">Menú del Foodtruck</h2>
-
+                    <h2 className="navegacion-titulo">Menú</h2>
                     <nav className="lista-categorias">
-                        {fullMenu.map((cat) => (
+                        {fullMenu?.filter(e => e.products.length > 0)?.map((cat) => (
                             <button
                                 key={cat.id}
                                 className={`categoria-item ${selectedCategory === cat.id ? "activo" : ""}`}
@@ -274,37 +292,27 @@ export default function OrderClientViewMain({ menu }) {
                     </nav>
                 </aside>
 
-
-                {/* PRODUCTOS */}
                 <main className="pedido-productos">
-
                     <h1 className="productos-titulo">
                         {fullMenu.find((c) => c.id === selectedCategory)?.name || ""}
                     </h1>
-
                     <div className="lista-productos-grid">
-                        {productos.map((producto) => (
-                            <article key={producto.id} className="producto-tarjeta">
+
+                        
+                        {productos?.map((producto) => (
+                            <article key={producto?.id} className="producto-tarjeta">
                                 <div className="producto-imagen-contenedor">
                                     <img
-                                        src={`${producto.image_url || "https://via.placeholder.com/400x225"}`}
-                                        alt={producto.name}
+                                        src={`${producto?.image_url || "https://via.placeholder.com/400x225"}`}
+                                        alt={producto?.name}
                                         className="producto-imagen"
                                     />
                                 </div>
-
                                 <div className="producto-info">
-                                    <h3 className="producto-nombre">{producto.name}</h3>
-
-                                    <p className="producto-descripcion">
-                                        {producto.description || "Descripción del producto"}
-                                    </p>
-
+                                    <h3 className="producto-nombre">{producto?.name}</h3>
+                                    <p className="producto-descripcion">{producto?.description}</p>
                                     <div className="producto-precio-accion">
-                                        <span className="producto-precio">
-                                            ${producto.base_price.toLocaleString("es-CL")}
-                                        </span>
-
+                                        <span className="producto-precio">${producto?.base_price.toLocaleString("es-CL")}</span>
                                         <button
                                             className="btn-agregar-carrito"
                                             onClick={() => addToCart(producto)}
@@ -319,13 +327,8 @@ export default function OrderClientViewMain({ menu }) {
                     </div>
                 </main>
 
-
-                {/* CARRITO */}
                 <aside className="pedido-carrito">
-                    <h2 className="carrito-titulo">
-                        Tu Pedido <span>({totalItems} ítems)</span>
-                    </h2>
-
+                    <h2 className="carrito-titulo">Tu Pedido <span>({totalItems})</span></h2>
                     <div className="carrito-items-lista">
                         {cart.length === 0 ? (
                             <p className="carrito-vacio-mensaje">Agrega productos para comenzar</p>
@@ -334,37 +337,13 @@ export default function OrderClientViewMain({ menu }) {
                                 <div key={item.product_id} className="carrito-item">
                                     <div className="item-info">
                                         <span className="item-nombre">{item.productName}</span>
-                                        <span className="item-subtotal">
-                                            ${(item.price * item.quantity).toLocaleString("es-CL")}
-                                        </span>
+                                        <span className="item-subtotal">${(item.price * item.quantity).toLocaleString("es-CL")}</span>
                                     </div>
-
                                     <div className="item-controles">
-                                        <button
-                                            className="btn-ajustar-cantidad"
-                                            onClick={() => decreaseQuantity(item.product_id)}
-                                            disabled={isLoading}
-                                        >
-                                            -
-                                        </button>
-
+                                        <button className="btn-ajustar-cantidad" onClick={() => decreaseQuantity(item.product_id)} disabled={isLoading}>-</button>
                                         <span className="item-cantidad-badge">{item.quantity}</span>
-
-                                        <button
-                                            className="btn-ajustar-cantidad"
-                                            onClick={() => increaseQuantity(item.product_id)}
-                                            disabled={isLoading}
-                                        >
-                                            +
-                                        </button>
-
-                                        <button
-                                            className="btn-eliminar-completo"
-                                            onClick={() => removeItem(item.product_id)}
-                                            disabled={isLoading}
-                                        >
-                                            ❌
-                                        </button>
+                                        <button className="btn-ajustar-cantidad" onClick={() => increaseQuantity(item.product_id)} disabled={isLoading}>+</button>
+                                        <button className="btn-eliminar-completo" onClick={() => removeItem(item.product_id)} disabled={isLoading}>❌</button>
                                     </div>
                                 </div>
                             ))
@@ -376,7 +355,6 @@ export default function OrderClientViewMain({ menu }) {
                             <span>Subtotal:</span>
                             <span>${subtotal.toLocaleString("es-CL")}</span>
                         </div>
-
                         <div className="resumen-detalle resumen-total">
                             <span>Total:</span>
                             <span>${total.toLocaleString("es-CL")}</span>
@@ -388,10 +366,9 @@ export default function OrderClientViewMain({ menu }) {
                         disabled={cart.length === 0 || isLoading}
                         onClick={finalizarPedido}
                     >
-                        {isLoading ? "⏳ Procesando pedido..." : "Proceder al Pago"}
+                        {isLoading ? "⏳ Procesando..." : "Proceder al Pago"}
                     </button>
                 </aside>
-
             </section>
         </>
     );
